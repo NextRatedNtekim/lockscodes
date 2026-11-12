@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@theme{--color-lime:#d4ff4f;--color-bg:#070707;--color-line:rgba(255,255,255,.1);--font-display:var(--f-display),sans-serif;--font-sans:var(--f-sans),sans-serif}
+html{background:var(--color-bg);color:#f2f2ee;scroll-behavior:smooth}
+body{font-family:var(--font-sans);-webkit-font-smoothing:antialiased}
+::selection{background:var(--color-lime);color:#000}
+:focus-visible{outline:2px solid var(--color-lime);outline-offset:3px}
