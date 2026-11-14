@@ -1,5 +1,5 @@
 import { Work, Quote } from "@/components/sections";
-export const metadata = { title: "Work | LocksCodes" };
+export const metadata = { title: "Work", description: "Websites and apps shipped by LocksCodes, from booking sites to gamified productivity apps.", alternates: { canonical: "/projects" } };
 export default function Projects() {
   return (<main>
     <section className="mx-auto max-w-6xl px-6 pb-8 pt-36 md:pt-40">

@@ -1,5 +1,5 @@
 import { Badge, Stats, Why, Quote } from "@/components/sections";
-export const metadata = { title: "About | LocksCodes" };
+export const metadata = { title: "About", description: "Meet LocksCodes, a web and app agency founded by Samuel Ntekim, a self-taught full stack developer and AI engineer.", alternates: { canonical: "/about" } };
 const stack = ["React", "Next.js", "TypeScript", "Tailwind CSS", "Framer Motion", "Supabase", "Node.js", "Zustand"];
 export default function About() {
   return (<main>
