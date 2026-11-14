@@ -1,4 +1,4 @@
-import { Hero, Marquee, Services, WorkSection, Process, Statement, Why, Quote, Faq, Brief } from "@/components/sections";
+import { Hero, Marquee, Stats, Services, WorkSection, Process, Statement, Why, Quote, Faq } from "@/components/sections";
 export default function Home() {
-  return (<main><Hero /><Marquee /><Services /><WorkSection /><Process /><Statement /><Why /><Quote /><Faq /><Brief /></main>);
+  return (<main><Hero /><Marquee /><Stats /><Services /><WorkSection /><Process /><Statement /><Why /><Quote /><Faq /></main>);
 }

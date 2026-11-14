@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useRef, useState } from "react";
-import { motion, AnimatePresence, useMotionValue, useSpring, useScroll, useTransform, useMotionTemplate } from "motion/react";
-import { Globe, LayoutDashboard, Smartphone, Sparkles, Zap, MousePointerClick, MessageSquare, Layers, ArrowUpRight, Plus, Send, Phone, Mail } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence, useMotionValue, useSpring, useScroll, useTransform, useMotionTemplate, useInView, animate } from "motion/react";
+import { Globe, LayoutDashboard, Smartphone, Sparkles, Zap, MousePointerClick, MessageSquare, Layers, ArrowUpRight, Plus, Send, Phone, Mail, Code2, Loader2, CheckCircle2 } from "lucide-react";
+import emailjs from "@emailjs/browser";
 import { EMAIL, projects, services, steps, faqs, why, U, photos } from "@/lib/data";
 
 const ease = [0.16, 1, 0.3, 1] as const;
@@ -15,58 +16,78 @@ const reveal = { initial: { opacity: 0, y: 40 }, whileInView: { opacity: 1, y: 0
 export function Nav() {
   return (
     <motion.header initial={{ y: -40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8, ease, delay: 0.2 }} className="fixed inset-x-0 top-4 z-50 flex justify-center px-4">
-      <nav className="flex w-full max-w-2xl items-center justify-between rounded-full border border-white/10 bg-black/60 py-2 pl-6 pr-2 backdrop-blur-xl">
-        <Link href="/" className="font-display text-xl font-bold">LocksCodes<span className="text-lime">.</span></Link>
-        <div className="flex items-center gap-6 text-sm text-white/70">
-          <Link href="/projects" className="hidden hover:text-white sm:block">Work</Link>
-          <Link href="/#services" className="hidden hover:text-white sm:block">Services</Link>
+      <nav className="flex w-full max-w-2xl items-center justify-between rounded-full border border-white/10 bg-black/60 py-2 pl-5 pr-2 backdrop-blur-xl">
+        <Link href="/" className="font-display text-lg font-bold sm:text-xl">LocksCodes<span className="text-lime">.</span></Link>
+        <div className="flex items-center gap-3 text-sm text-white/70 sm:gap-6">
+          <Link href="/projects" className="hover:text-white">Work</Link>
+          <Link href="/about" className="hover:text-white">About</Link>
           <Link href="/#faq" className="hidden hover:text-white md:block">FAQ</Link>
-          <Link href="/#brief" className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-semibold text-black transition hover:bg-lime">Start a project <Phone size={15} /></Link>
+          <Link href="/contact" className="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 font-semibold text-black transition hover:bg-lime sm:px-5"><span className="sm:hidden">Contact</span><span className="hidden sm:inline">Start a project</span> <Phone size={15} /></Link>
         </div>
       </nav>
     </motion.header>
   );
 }
 
-export function Hero() {
-  const mx = useMotionValue(0), my = useMotionValue(0);
-  const x = useSpring(mx, { stiffness: 60, damping: 15 }), y = useSpring(my, { stiffness: 60, damping: 15 });
-  const rx = useTransform(y, [-1, 1], [8, -8]), ry = useTransform(x, [-1, 1], [-10, 10]);
-  const cards = ["/work/magnum.png", "/work/taskr.png", "/work/theorem.png"];
+export function Badge() {
   return (
-    <section onPointerMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); mx.set(((e.clientX - r.left) / r.width) * 2 - 1); my.set(((e.clientY - r.top) / r.height) * 2 - 1); }}
-      className="relative overflow-hidden pb-24 pt-36">
-      <div className="absolute right-[-10%] top-10 h-[34rem] w-[34rem] rounded-full bg-lime/20 blur-[120px]" />
-      <div className={`${wrap} relative grid items-center gap-16 lg:grid-cols-[1.1fr_.9fr]`}>
-        <div>
-          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm text-white/70">
-            <span className="h-2 w-2 rounded-full bg-lime" /> Web and app agency, founded by Samuel Ntekim
-          </motion.p>
-          <h1 className="font-display text-[clamp(3rem,7.5vw,6.5rem)] font-extrabold leading-[.95] tracking-tighter">
-            {["We ship websites", "and apps that", "get used."].map((l, i) => (
-              <span key={l} className="block overflow-hidden pb-[.08em]">
-                <motion.span className="block" initial={{ y: "110%" }} animate={{ y: 0 }} transition={{ duration: 1, ease, delay: 0.3 + i * 0.12 }}>{l}</motion.span>
-              </span>
-            ))}
-          </h1>
-          <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.8, ease }} className="mt-8 max-w-md text-lg leading-relaxed text-white/60">
-            We design, build and launch websites, web apps and mobile apps for businesses that want to look credible and move fast.
-          </motion.p>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05, duration: 0.8, ease }} className="mt-10 flex flex-wrap gap-3">
-            <Link href="/#brief" className="flex items-center gap-2 rounded-full bg-lime px-7 py-4 font-semibold text-black transition hover:scale-105">Send a project brief <Send size={17} /></Link>
-            <Link href="/projects" className="flex items-center gap-2 rounded-full bg-white px-7 py-4 font-semibold text-black transition hover:scale-105">See our work <ArrowUpRight size={18} /></Link>
+    <div className="relative h-36 w-36 shrink-0 md:h-44 md:w-44">
+      <motion.svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full" animate={{ rotate: 360 }} transition={{ duration: 22, ease: "linear", repeat: Infinity }}>
+        <defs><path id="ring" d="M100,100 m-78,0 a78,78 0 1,1 156,0 a78,78 0 1,1 -156,0" /></defs>
+        <text className="fill-white/70 text-[15px] font-semibold uppercase tracking-[.2em]"><textPath href="#ring">Founder · Samuel Ntekim · LocksCodes ·</textPath></text>
+      </motion.svg>
+      <motion.span animate={{ scale: [1, 1.08, 1] }} transition={{ duration: 3, repeat: Infinity }} className="absolute inset-[28%] flex items-center justify-center rounded-full bg-lime text-black"><Code2 size={34} /></motion.span>
+    </div>
+  );
+}
+
+export function Hero() {
+  const ref = useRef(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], [0, -90]), o = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const thumbs = [...projects, ...projects];
+  return (
+    <section ref={ref} className="relative overflow-hidden pt-32 md:pt-40">
+      <motion.div aria-hidden animate={{ x: [0, 60, -30, 0], y: [0, 40, -20, 0] }} transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }} className="absolute left-1/2 top-24 h-72 w-72 -translate-x-1/2 rounded-full bg-lime/20 blur-[110px] md:h-[30rem] md:w-[30rem]" />
+      <motion.div style={{ y, opacity: o }} className={`${wrap} relative`}>
+        <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 px-4 py-2 text-sm text-white/70"><span className="h-2 w-2 animate-pulse rounded-full bg-lime" /> Web and app agency</motion.p>
+        <h1 aria-label="LocksCodes" className="font-display text-[clamp(3rem,15vw,12rem)] font-extrabold leading-[.9] tracking-tighter">
+          {"LocksCodes".split("").map((c, i) => (
+            <span key={i} aria-hidden className="inline-block overflow-hidden pb-[.1em] align-bottom">
+              <motion.span className={`inline-block ${i > 4 ? "text-lime" : ""}`} initial={{ y: "115%", rotate: 8 }} animate={{ y: 0, rotate: 0 }} transition={{ duration: 1, ease, delay: 0.25 + i * 0.05 }}>{c}</motion.span>
+            </span>))}
+        </h1>
+        <div className="mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1, duration: 0.8, ease }}>
+            <p className="max-w-lg text-lg leading-relaxed text-white/60">Founded by Samuel Ntekim. We ship websites and apps for businesses that want to look credible and move fast.</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/contact" className="flex items-center gap-2 rounded-full bg-lime px-7 py-4 font-semibold text-black transition hover:scale-105">Start a project <Send size={17} /></Link>
+              <Link href="/projects" className="flex items-center gap-2 rounded-full bg-white px-7 py-4 font-semibold text-black transition hover:scale-105">See our work <ArrowUpRight size={18} /></Link>
+            </div>
           </motion.div>
+          <motion.div initial={{ opacity: 0, scale: 0.6, rotate: -40 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ delay: 1.1, duration: 1, ease }}><Badge /></motion.div>
         </div>
-        <motion.div style={{ rotateX: rx, rotateY: ry, perspective: 1000 }} className="relative hidden h-[30rem] lg:block">
-          {cards.map((src, i) => (
-            <motion.img key={src} src={src} alt="" initial={{ opacity: 0, y: 80 }} animate={{ opacity: 1, y: [0, -12, 0] }}
-              transition={{ opacity: { delay: 0.8 + i * 0.2 }, y: { duration: 5 + i, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 } }}
-              className="absolute w-72 rounded-2xl border border-white/10 object-cover shadow-2xl" style={{ top: i * 100, left: i % 2 ? 0 : 110, zIndex: i, aspectRatio: "16/10" }} />
-          ))}
-          {[Zap, Smartphone, Sparkles].map((I, i) => (
-            <motion.span key={i} animate={{ y: [0, 10, 0] }} transition={{ duration: 4 + i, repeat: Infinity }} className="absolute z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-lime text-black" style={{ top: 10 + i * 140, right: i % 2 ? 0 : 30 }}><I size={24} /></motion.span>
-          ))}
+      </motion.div>
+      <div className="mt-16 overflow-hidden pb-4" aria-hidden>
+        <motion.div className="flex w-max gap-4" animate={{ x: ["0%", "-50%"] }} transition={{ duration: 40, ease: "linear", repeat: Infinity }}>
+          {thumbs.map((p, i) => <img key={i} src={p.img} alt="" className="h-36 w-56 rounded-2xl border border-white/10 object-cover object-top md:h-48 md:w-72" />)}
         </motion.div>
+      </div>
+    </section>
+  );
+}
+
+export function Stats() {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const [v, setV] = useState([0, 0, 0]);
+  const t = [4, 6, 4];
+  useEffect(() => { if (!inView) return; const c = animate(0, 1, { duration: 1.6, ease, onUpdate: (p) => setV(t.map((n) => Math.round(n * p))) }); return () => c.stop(); }, [inView]);
+  const l = ["Years building", "Projects shipped", "Service areas"];
+  return (
+    <section ref={ref} className={`${wrap} py-16`}>
+      <div className="grid grid-cols-3 gap-4 border-y border-line py-10 text-center">
+        {l.map((x, i) => (<div key={x}><p className="font-display text-4xl font-extrabold text-lime md:text-7xl">{v[i]}{i === 0 ? "+" : ""}</p><p className="mt-1 text-xs text-white/60 md:text-base">{x}</p></div>))}
       </div>
     </section>
   );
@@ -180,7 +201,7 @@ export function Quote() {
     <section className={`${wrap} py-24`}>
       <motion.div {...reveal} className="grid items-center gap-10 rounded-[2rem] border border-line bg-white/[.03] p-8 md:grid-cols-2 md:p-14">
         <div><H2>Every project is quoted</H2><p className="mt-5 max-w-md text-lg text-white/60">No fixed plans. Tell us what you need and we'll send a clear quote with scope, timeline and deliverables.</p>
-          <Link href="/#brief" className="mt-8 inline-flex items-center gap-2 rounded-full bg-lime px-7 py-4 font-semibold text-black transition hover:scale-105">Request a quote <Send size={17} /></Link></div>
+          <Link href="/contact" className="mt-8 inline-flex items-center gap-2 rounded-full bg-lime px-7 py-4 font-semibold text-black transition hover:scale-105">Request a quote <Send size={17} /></Link></div>
         <img src={U(photos.data, 900)} alt="" onError={hide} className="aspect-[4/3] w-full rounded-2xl object-cover" />
       </motion.div>
     </section>
@@ -206,21 +227,36 @@ export function Faq() {
 }
 
 export function Brief() {
-  const [sent, setSent] = useState(false);
-  const field = "w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 outline-none transition focus:border-lime";
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const field = "w-full rounded-xl border border-white/15 !bg-black px-4 py-3 outline-none transition focus:border-black";
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget, f = new FormData(form);
+    const svc = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID, tpl = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID, key = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
+    if (!svc || !tpl || !key) return setStatus("error");
+    setStatus("sending");
+    try {
+      await emailjs.send(svc, tpl, { from_name: f.get("name"), reply_to: f.get("email"), project_type: f.get("type"), message: f.get("details") }, { publicKey: key });
+      setStatus("sent"); form.reset();
+    } catch { setStatus("error"); }
+  }
   return (
-    <section id="brief" className="px-4 py-24">
-      <motion.div {...reveal} className="mx-auto grid max-w-6xl gap-12 rounded-[2rem] bg-lime p-8 text-black md:grid-cols-2 md:p-14">
-        <div><h2 className="font-display text-5xl font-extrabold leading-[.95] tracking-tighter md:text-7xl">Have something to launch?</h2>
+    <section id="brief" className="px-4 py-20">
+      <motion.div {...reveal} className="mx-auto grid max-w-6xl gap-10 rounded-[2rem] bg-lime p-6 text-black md:grid-cols-2 md:gap-12 md:p-14">
+        <div><h2 className="font-display text-4xl font-extrabold leading-[.95] tracking-tighter sm:text-5xl md:text-7xl">Have something to launch?</h2>
           <p className="mt-6 max-w-sm text-lg text-black/70">Share a few details. We'll reply with questions, a plan and a quote.</p>
-          <p className="mt-8 flex items-center gap-2 font-medium"><Mail size={18} /> {EMAIL}</p></div>
-        <form onSubmit={(e) => { e.preventDefault(); const f = new FormData(e.currentTarget);
-          window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent("Project brief from " + f.get("name"))}&body=${encodeURIComponent(`Name: ${f.get("name")}\nEmail: ${f.get("email")}\nProject: ${f.get("type")}\n\n${f.get("details")}`)}`; setSent(true); }} className="space-y-3 text-white">
-          <input required name="name" placeholder="Your name" className={`${field} !bg-black`} />
-          <input required type="email" name="email" placeholder="Email address" className={`${field} !bg-black`} />
-          <select name="type" className={`${field} !bg-black`}>{["Website", "Web app", "Mobile app", "AI feature", "Not sure yet"].map((o) => <option key={o}>{o}</option>)}</select>
-          <textarea required name="details" rows={4} placeholder="What are you building, and by when?" className={`${field} !bg-black`} />
-          <button className="flex w-full items-center justify-center gap-2 rounded-full bg-black px-7 py-4 font-semibold transition hover:scale-[1.02]">{sent ? "Opening your email app" : "Send brief"} <Send size={17} /></button>
+          <p className="mt-8 flex items-center gap-2 break-all font-medium"><Mail size={18} className="shrink-0" /> {EMAIL}</p></div>
+        <form onSubmit={submit} className="space-y-3 text-white">
+          <input required name="name" placeholder="Your name" className={field} />
+          <input required type="email" name="email" placeholder="Email address" className={field} />
+          <select name="type" className={field}>{["Website", "Web app", "Mobile app", "AI feature", "Not sure yet"].map((o) => <option key={o}>{o}</option>)}</select>
+          <textarea required name="details" rows={4} placeholder="What are you building, and by when?" className={field} />
+          <button disabled={status === "sending"} className="flex w-full items-center justify-center gap-2 rounded-full bg-black px-7 py-4 font-semibold transition hover:scale-[1.02] disabled:opacity-60">
+            {status === "sending" ? <><Loader2 size={17} className="animate-spin" /> Sending</> : <>Send brief <Send size={17} /></>}</button>
+          <AnimatePresence mode="wait">
+            {status === "sent" && <motion.p key="s" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 font-medium text-black"><CheckCircle2 size={18} /> Sent. We'll reply by email soon.</motion.p>}
+            {status === "error" && <motion.p key="e" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="font-medium text-black">Couldn't send. Please email {EMAIL} directly.</motion.p>}
+          </AnimatePresence>
         </form>
       </motion.div>
     </section>
@@ -229,9 +265,9 @@ export function Brief() {
 
 export function Footer() {
   return (
-    <footer className={`${wrap} flex flex-col justify-between gap-4 border-t border-line py-10 text-sm text-white/50 sm:flex-row`}>
+    <footer className={`${wrap} flex flex-col justify-between gap-6 border-t border-line py-10 text-sm text-white/50 md:flex-row`}>
       <p>© {new Date().getFullYear()} LocksCodes. Founded by Samuel Ntekim.</p>
-      <p className="flex gap-6"><a className="hover:text-lime" href="https://github.com/underrated-lx">GitHub</a><a className="hover:text-lime" href="https://x.com/underrated_lx">X</a></p>
+      <p className="flex flex-wrap gap-x-6 gap-y-2"><Link className="hover:text-lime" href="/projects">Work</Link><Link className="hover:text-lime" href="/about">About</Link><Link className="hover:text-lime" href="/contact">Contact</Link><a className="hover:text-lime" href="https://github.com/underrated-lx">GitHub</a><a className="hover:text-lime" href="https://x.com/underrated_lx">X</a></p>
     </footer>
   );
 }
